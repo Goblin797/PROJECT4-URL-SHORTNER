@@ -54,7 +54,7 @@ const urlShortner = async (req,res) => {
     {
         let longUrl = req.body.longUrl
 
-        if(!longUrl || !longUrl.trim()){
+        if(Object.keys(req.body).length==0 || !longUrl.trim()){
             return res.status(400).send({status:false , message: "please enter a URL"})
         }
 
@@ -83,6 +83,9 @@ const urlShortner = async (req,res) => {
 
         //base url
         const baseUrl = 'http://localhost:3000'
+        if(!validurl.isUri(baseUrl)){
+          return res.send({message:"invalid baseurl"})
+        }
 
         //url code generation
         const urlCode = shortid.generate().toLowerCase()
@@ -92,9 +95,10 @@ const urlShortner = async (req,res) => {
         const shortUrl = baseUrl + '/' + urlCode
         console.log(shortUrl)
 
-        await SET_ASYNC(`${longUrl}`,JSON.stringify({longUrl:longUrl,shortUrl:shortUrl,urlCode:urlCode}))
-
-        const url = await UrlModel.create({longUrl:longUrl,shortUrl:shortUrl,urlCode:urlCode})
+        const url = await UrlModel.create({longUrl:longUrl ,shortUrl:shortUrl ,urlCode:urlCode})
+        
+        await SET_ASYNC(`${longUrl}`,JSON.stringify({longUrl:longUrl ,shortUrl:shortUrl ,urlCode:urlCode}))
+        
         return res.status(201).send({status:true ,data:url})
     }
     catch(err){
@@ -120,7 +124,6 @@ const getUrl = async (req,res) => {
         
         //if key name urlCode is present in cache memory
         if(cachedLongUrl){
-          console.log(1)
             return res.status(302).redirect(JSON.parse(cachedLongUrl))
         }
         
