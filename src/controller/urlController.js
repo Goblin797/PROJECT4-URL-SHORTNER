@@ -83,7 +83,7 @@ const urlShortner = async (req, res) => {
     //base url
     const baseUrl = 'http://localhost:3000'
     if (!validurl.isUri(baseUrl)) {
-      return res.send({ message: "invalid baseurl" })
+      return res.status(400).send({ message: "invalid baseurl" })
     }
 
     //url code generation
@@ -110,6 +110,10 @@ const urlShortner = async (req, res) => {
 const getUrl = async (req, res) => {
   try {
     let urlCode = req.params.urlCode
+    if(!urlCode.trim()){
+      return res.status(400).send({ status: false, message: "urlcode is missing" })
+
+    }
     if (!shortid.isValid(urlCode)) {
       return res.status(400).send({ status: false, message: `${urlCode} is invalid urlcode` })
     }
